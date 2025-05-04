@@ -2671,27 +2671,42 @@ proc makewindow {} {
     pack .ctop -fill both -expand 1
     bindall <1> {selcanvline %W %x %y}
     #bindall <B1-Motion> {selcanvline %W %x %y}
-    if {[tk windowingsystem] == "win32"} {
-        bind . <MouseWheel> { windows_mousewheel_redirector %W %X %Y %D }
-        bind $ctext <MouseWheel> { windows_mousewheel_redirector %W %X %Y %D ; break }
-    } else {
-        bindall <ButtonRelease-4> "allcanvs yview scroll -5 units"
-        bindall <ButtonRelease-5> "allcanvs yview scroll 5 units"
-        bind $ctext <Button> {
-            if {"%b" eq 6} {
-                $ctext xview scroll -5 units
-            } elseif {"%b" eq 7} {
-                $ctext xview scroll 5 units
-            }
+    global have_tk90
+    if {$have_tk90} {
+        bindall <MouseWheel> {
+            set delta [expr {((%D) >= 0) ? -5 : 5}]
+            allcanvs yview scroll $delta units
         }
-        if {[tk windowingsystem] eq "aqua"} {
-            bindall <MouseWheel> {
-                set delta [expr {- (%D)}]
-                allcanvs yview scroll $delta units
+        bindall <Shift-MouseWheel> {
+            set delta [expr {((%D) >= 0) ? -1 : 1}]
+            $canv xview scroll $delta units
+        }
+    } else {
+        switch -- [tk windowingsystem] {
+            "win32" {
+                bind .      <MouseWheel> { windows_mousewheel_redirector %W %X %Y %D }
+                bind $ctext <MouseWheel> { windows_mousewheel_redirector %W %X %Y %D }
             }
-            bindall <Shift-MouseWheel> {
-                set delta [expr {- (%D)}]
-                $canv xview scroll $delta units
+            "aqua" {
+                bindall <MouseWheel> {
+                    set delta [expr {- (%D)}]
+                    allcanvs yview scroll $delta units
+                }
+                bindall <Shift-MouseWheel> {
+                    set delta [expr {- (%D)}]
+                    $canv xview scroll $delta units
+                }
+            }
+            "x11" {
+                bindall <ButtonRelease-4> "allcanvs yview scroll -5 units"
+                bindall <ButtonRelease-5> "allcanvs yview scroll  5 units"
+                bind $ctext <Button> {
+                    if {"%b" eq 6} {
+                        $ctext xview scroll -1 units
+                    } elseif {"%b" eq 7} {
+                        $ctext xview scroll  1 units
+                    }
+                }
             }
         }
     }
