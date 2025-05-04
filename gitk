@@ -7802,7 +7802,7 @@ proc gettree {id} {
             set treepending $id
             set treefilelist($id) {}
             set treeidlist($id) {}
-            fconfigure $gtf -blocking 0 -encoding binary
+            fconfigure $gtf -blocking 0 -translation binary
             filerun $gtf [list gettreeline $gtf $id]
         }
     } else {
@@ -8065,7 +8065,7 @@ proc gettreediffs {ids} {
 
     set treepending $ids
     set treediff {}
-    fconfigure $gdtf -blocking 0 -encoding binary
+    fconfigure $gdtf -blocking 0 -translation binary
     filerun $gdtf [list gettreediffline $gdtf $ids]
 }
 
@@ -8185,7 +8185,7 @@ proc getblobdiffs {ids} {
         error_popup [mc "Error getting diffs: %s" $err]
         return
     }
-    fconfigure $bdf -blocking 0 -encoding binary -eofchar {}
+    fconfigure $bdf -blocking 0 -translation binary -eofchar {}
     set blobdifffd($ids) $bdf
     initblobdiffvars
     filerun $bdf [list getblobdiffline $bdf $diffids]
